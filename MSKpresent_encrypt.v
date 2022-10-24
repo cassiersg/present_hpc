@@ -92,6 +92,7 @@ else
 reg [SIZE_R_CNT-1:0] r_cnt;
 wire [SIZE_R_CNT-1:0] to_r_cnt;
 wire en_r_cnt;
+wire last_round;
 
 // On control path - does not need special consideration for masking (not shared)
 always@(posedge clk) begin
@@ -444,7 +445,7 @@ if(IS_NOT_SERIAL) begin
     // On control path - does not need special consideration for masking (not shared)
     assign to_r_cnt = valid_in ? {SIZE_R_CNT{1'b0}} : r_cnt +1'b1;
     assign en_r_cnt = (masking_cnt == 2**PDSBOX+3) | valid_in;
-    wire last_round = starting ? 0 : (r_cnt == (Ns-2));
+    assign last_round = starting ? 0 : (r_cnt == (Ns-2));
     assign end_process = last_round & ( masking_cnt == SB_DIVIDER+3);
     assign rst_masking_cnt = en_r_cnt;
     assign rst_random_cnt = (random_cnt == 2**PDSBOX+3);
@@ -456,7 +457,7 @@ end else begin // IS_SERIAL
     // On control path - does not need special consideration for masking (not shared)
     wire end_SB = (masking_cnt == SB_DIVIDER+3+1);
     wire end_round = end_SB;
-    wire last_round = starting ? 0: (r_cnt == (Ns-1));
+    assign last_round = starting ? 0: (r_cnt == (Ns-1));
 
     assign to_r_cnt = valid_in ? {SIZE_R_CNT{1'b0}} : r_cnt +1'b1;
     assign en_r_cnt = end_round | valid_in;
